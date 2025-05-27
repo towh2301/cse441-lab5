@@ -10,6 +10,7 @@ import React from "react";
 import "react-native-reanimated";
 
 import { AuthProvider } from "@/context/authContext/AuthContext";
+import { ServiceProvider } from "@/context/serviceContext/ServiceContext";
 import { useColorScheme } from "@/hooks/useColorScheme";
 
 export default function RootLayout() {
@@ -25,22 +26,24 @@ export default function RootLayout() {
 
 	return (
 		<AuthProvider>
-			<ThemeProvider
-				value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-			>
-				<Stack>
-					<Stack.Screen
-						name="(auth)"
-						options={{ headerShown: false }}
-					/>
-					<Stack.Screen
-						name="(tabs)"
-						options={{ headerShown: false }}
-					/>
-					<Stack.Screen name="+not-found" />
-				</Stack>
-				<StatusBar style="auto" />
-			</ThemeProvider>
+			<ServiceProvider>
+				<ThemeProvider
+					value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+				>
+					<Stack>
+						<Stack.Screen
+							name="(auth)"
+							options={{ headerShown: false }}
+						/>
+						<Stack.Screen
+							name="(tabs)"
+							options={{ headerShown: false }}
+						/>
+						<Stack.Screen name="+not-found" />
+					</Stack>
+					<StatusBar style="auto" />
+				</ThemeProvider>
+			</ServiceProvider>
 		</AuthProvider>
 	);
 }

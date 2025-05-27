@@ -8,9 +8,8 @@ import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { IconSymbol } from "@/components/ui/IconSymbol";
-import { Service } from "@/interface/services/types";
-
-const API_URL = "https://kami-backend-5rs0.onrender.com/services";
+import { URLS } from "@/helpers/urls";
+import { Service } from "@/storage/services/types";
 
 export default function HomeScreen() {
 	const [featuredServices, setFeaturedServices] = useState<Service[]>([]);
@@ -22,7 +21,7 @@ export default function HomeScreen() {
 
 	const fetchFeaturedServices = async () => {
 		try {
-			const response = await axios.get(API_URL);
+			const response = await axios.get(URLS.SERVICES);
 			// In a real app, you might have a featured flag or sort by popularity
 			// Here we just take the first 5 services
 			setFeaturedServices(response.data.slice(0, 5));

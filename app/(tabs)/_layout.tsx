@@ -47,6 +47,15 @@ export default function TabLayout() {
 					),
 				}}
 			/>
+			<Tabs.Screen
+				name="explore"
+				options={{
+					title: "About us",
+					tabBarIcon: ({ color }) => (
+						<Ionicons size={28} name="airplane" color={color} />
+					),
+				}}
+			/>
 		</Tabs>
 	);
 }

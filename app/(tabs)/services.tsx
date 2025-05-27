@@ -12,9 +12,8 @@ import {
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { IconSymbol } from "@/components/ui/IconSymbol";
-import { Service } from "@/interface/services/types";
-
-const API_URL = "https://kami-backend-5rs0.onrender.com/services";
+import { URLS } from "@/helpers/urls";
+import { Service } from "@/storage/services/types";
 
 export default function ServicesScreen() {
 	const [services, setServices] = useState<Service[]>([]);
@@ -28,7 +27,7 @@ export default function ServicesScreen() {
 	const fetchServices = async () => {
 		try {
 			setLoading(true);
-			const response = await axios.get(API_URL);
+			const response = await axios.get(URLS.SERVICES);
 			setServices(response?.data || []);
 			setError(null);
 		} catch (err) {

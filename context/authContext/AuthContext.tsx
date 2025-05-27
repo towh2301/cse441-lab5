@@ -2,8 +2,8 @@ import {
 	clearUserData,
 	getUserData,
 	storeUserData,
-} from "@/utils/auth/authStorage";
-import { UserData } from "@/utils/auth/types";
+} from "@/storage/auth/authStorage";
+import { UserData } from "@/storage/auth/types";
 import { createContext, useContext, useEffect, useState } from "react";
 
 // Create the Context is for the children nodes so they can access context of AuthContext
