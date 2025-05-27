@@ -6,19 +6,19 @@ import { Button, Input } from "react-native-elements";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/context/authContext/AuthContext";
 
 const API_URL = "https://kami-backend-5rs0.onrender.com/auth";
 
 export default function RegisterScreen() {
 	const { login } = useAuth();
-	const [email, setEmail] = useState("");
+	const [phone, setPhone] = useState("");
 	const [password, setPassword] = useState("");
 	const [confirmPassword, setConfirmPassword] = useState("");
 	const [loading, setLoading] = useState(false);
 
 	const handleRegister = async () => {
-		if (!email || !password || !confirmPassword) {
+		if (!phone || !password || !confirmPassword) {
 			Alert.alert("Error", "Please fill in all fields");
 			return;
 		}
@@ -31,16 +31,16 @@ export default function RegisterScreen() {
 		try {
 			setLoading(true);
 			const response = await axios.post(`${API_URL}/register`, {
-				email,
+				phone,
 				password,
 			});
 			if (response.data) {
 				// Store user data using auth context
 				await login({
-					email,
+					phone,
 					// Don't store raw password for security reasons
 					// In a real app, you would store a token instead
-					isRegistered: true,
+					isLoggedIn: true,
 				});
 
 				Alert.alert(
@@ -71,10 +71,10 @@ export default function RegisterScreen() {
 			<Input
 				placeholder="Email"
 				leftIcon={{ type: "font-awesome", name: "envelope" }}
-				onChangeText={setEmail}
-				value={email}
+				onChangeText={setPhone}
+				value={phone}
 				autoCapitalize="none"
-				keyboardType="email-address"
+				keyboardType="number-pad"
 				containerStyle={styles.inputContainer}
 			/>
 

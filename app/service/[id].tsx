@@ -1,46 +1,39 @@
-import React, { useState, useEffect } from "react";
-import {
-	StyleSheet,
-	ActivityIndicator,
-	Image,
-	ScrollView,
-	TouchableOpacity,
-	Alert,
-} from "react-native";
-import { useLocalSearchParams, router } from "expo-router";
 import axios from "axios";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {
+	ActivityIndicator,
+	Alert,
+	StyleSheet,
+	TouchableOpacity,
+} from "react-native";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { IconSymbol } from "@/components/ui/IconSymbol";
+import { Service } from "@/interface/services/types";
 
 const API_URL = "https://kami-backend-5rs0.onrender.com/services";
-
-interface Service {
-	id: string;
-	name: string;
-	description: string;
-	price: number;
-	category: string;
-	imageUrl?: string;
-	details?: string;
-	availableDates?: string[];
-	provider?: {
-		name: string;
-		rating: number;
-		reviews: number;
-	};
-}
 
 export default function ServiceDetails() {
 	const { id } = useLocalSearchParams();
 	const [service, setService] = useState<Service | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const navigation = useNavigation();
 
 	useEffect(() => {
 		fetchServiceDetails();
 	}, [id]);
+
+	useEffect(() => {
+		if (id && service) {
+			navigation.setOptions({
+				title: `${service?.name}`,
+				styles: {},
+			});
+		}
+	}, [id, service]);
 
 	const fetchServiceDetails = async () => {
 		if (!id) return;
@@ -112,91 +105,17 @@ export default function ServiceDetails() {
 
 	return (
 		<ThemedView style={styles.container}>
-			<TouchableOpacity
-				style={styles.backButton}
-				onPress={() => router.back()}
-			>
-				<IconSymbol size={24} name="chevron.left" color="#4B7BEC" />
-				<ThemedText style={styles.backText}>Back</ThemedText>
-			</TouchableOpacity>
+			<ThemedView style={styles.contentContainer}>
+				<ThemedText type="title" style={styles.serviceName}>
+					{service.name}
+				</ThemedText>
 
-			<ScrollView
-				style={styles.scrollContainer}
-				showsVerticalScrollIndicator={false}
-			>
-				{service.imageUrl && (
-					<Image
-						source={{ uri: service.imageUrl }}
-						style={styles.serviceImage}
-						resizeMode="cover"
-					/>
-				)}
-
-				<ThemedView style={styles.contentContainer}>
-					<ThemedText type="title" style={styles.serviceName}>
-						{service.name}
+				<ThemedView style={styles.priceCategory}>
+					<ThemedText style={styles.price}>
+						${service.price.toFixed(2)}
 					</ThemedText>
-
-					<ThemedView style={styles.priceCategory}>
-						<ThemedText style={styles.price}>
-							${service.price.toFixed(2)}
-						</ThemedText>
-						<ThemedText style={styles.category}>
-							{service.category}
-						</ThemedText>
-					</ThemedView>
-
-					<ThemedView style={styles.section}>
-						<ThemedText type="subtitle" style={styles.sectionTitle}>
-							Description
-						</ThemedText>
-						<ThemedText style={styles.description}>
-							{service.description}
-						</ThemedText>
-					</ThemedView>
-
-					{service.details && (
-						<ThemedView style={styles.section}>
-							<ThemedText
-								type="subtitle"
-								style={styles.sectionTitle}
-							>
-								Details
-							</ThemedText>
-							<ThemedText style={styles.details}>
-								{service.details}
-							</ThemedText>
-						</ThemedView>
-					)}
-
-					{service.provider && (
-						<ThemedView style={styles.section}>
-							<ThemedText
-								type="subtitle"
-								style={styles.sectionTitle}
-							>
-								Provider
-							</ThemedText>
-							<ThemedView style={styles.providerInfo}>
-								<ThemedText style={styles.providerName}>
-									{service.provider.name}
-								</ThemedText>
-								<ThemedView style={styles.ratingContainer}>
-									<IconSymbol
-										size={16}
-										name="star.fill"
-										color="#FFD700"
-									/>
-									<ThemedText style={styles.rating}>
-										{service.provider.rating.toFixed(1)} (
-										{service.provider.reviews} reviews)
-									</ThemedText>
-								</ThemedView>
-							</ThemedView>
-						</ThemedView>
-					)}
 				</ThemedView>
-			</ScrollView>
+			</ThemedView>
 
 			<ThemedView style={styles.bookButtonContainer}>
 				<TouchableOpacity

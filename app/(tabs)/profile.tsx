@@ -5,7 +5,7 @@ import { Alert, StyleSheet, TouchableOpacity } from "react-native";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { IconSymbol } from "@/components/ui/IconSymbol";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/context/authContext/AuthContext";
 
 export default function ProfileScreen() {
 	// Use the Auth context to get user data
@@ -23,7 +23,7 @@ export default function ProfileScreen() {
 		if (authUser) {
 			setUser({
 				...user,
-				email: authUser.email || "user@example.com",
+				email: authUser.phone || "user@example.com",
 				// You could retrieve more user info from authUser if needed
 			});
 		}

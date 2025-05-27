@@ -1,0 +1,3 @@
+export enum AUTH_STORAGE_KEY {
+	USER_DATA = "USER_DATA",
+}

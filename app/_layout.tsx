@@ -9,7 +9,7 @@ import { StatusBar } from "expo-status-bar";
 import React from "react";
 import "react-native-reanimated";
 
-import { AuthProvider } from "@/context/AuthContext";
+import { AuthProvider } from "@/context/authContext/AuthContext";
 import { useColorScheme } from "@/hooks/useColorScheme";
 
 export default function RootLayout() {

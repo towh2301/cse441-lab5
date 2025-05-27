@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -11,17 +12,9 @@ import {
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { IconSymbol } from "@/components/ui/IconSymbol";
+import { Service } from "@/interface/services/types";
 
 const API_URL = "https://kami-backend-5rs0.onrender.com/services";
-
-interface Service {
-	id: string;
-	name: string;
-	description: string;
-	price: number;
-	category: string;
-	imageUrl?: string;
-}
 
 export default function ServicesScreen() {
 	const [services, setServices] = useState<Service[]>([]);
@@ -36,7 +29,7 @@ export default function ServicesScreen() {
 		try {
 			setLoading(true);
 			const response = await axios.get(API_URL);
-			setServices(response.data);
+			setServices(response?.data || []);
 			setError(null);
 		} catch (err) {
 			console.error("Error fetching services:", err);
@@ -47,28 +40,20 @@ export default function ServicesScreen() {
 	};
 
 	const handleSelectService = (serviceId: string) => {
-		router.push(`/(tabs)/service/${serviceId}`);
+		router.push(`/service/${serviceId}`);
 	};
 
 	const renderServiceItem = ({ item }: { item: Service }) => (
 		<TouchableOpacity
 			style={styles.serviceCard}
-			onPress={() => handleSelectService(item.id)}
+			onPress={() => handleSelectService(item?._id)}
 		>
 			<ThemedView style={styles.serviceContent}>
 				<ThemedText type="subtitle" style={styles.serviceName}>
 					{item.name}
 				</ThemedText>
-				<ThemedText style={styles.serviceDescription}>
-					{item.description.length > 100
-						? `${item.description.substring(0, 100)}...`
-						: item.description}
-				</ThemedText>
 				<ThemedText style={styles.servicePrice}>
 					${item.price.toFixed(2)}
-				</ThemedText>
-				<ThemedText style={styles.serviceCategory}>
-					Category: {item.category}
 				</ThemedText>
 			</ThemedView>
 			<IconSymbol
@@ -116,13 +101,15 @@ export default function ServicesScreen() {
 				<ThemedText type="title" style={styles.title}>
 					Available Services
 				</ThemedText>
+				<TouchableOpacity onPress={() => console.log("add")}>
+					<Ionicons name="add-circle" size={24} color="#4B7BEC" />
+				</TouchableOpacity>
 			</ThemedView>
-
-			{services.length > 0 ? (
+			{services?.length > 0 ? (
 				<FlatList
 					data={services}
 					renderItem={renderServiceItem}
-					keyExtractor={(item) => item.id}
+					keyExtractor={(item) => item?._id}
 					contentContainerStyle={styles.servicesList}
 					showsVerticalScrollIndicator={false}
 				/>
@@ -150,6 +137,9 @@ const styles = StyleSheet.create({
 	header: {
 		paddingHorizontal: 20,
 		marginBottom: 20,
+		flexDirection: "row",
+		justifyContent: "space-between",
+		alignItems: "center",
 	},
 	title: {
 		fontSize: 28,
@@ -243,5 +233,10 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		color: "#666",
 		textAlign: "center",
+	},
+
+	buttonStyle: {
+		fontSize: 16,
+		color: "#666",
 	},
 });

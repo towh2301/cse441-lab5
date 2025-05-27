@@ -1,17 +1,16 @@
 import axios from "axios";
 import { router } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Alert, StyleSheet } from "react-native";
 import { Button, Input } from "react-native-elements";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import { useAuth } from "@/context/AuthContext";
-
-const API_URL = "https://kami-backend-5rs0.onrender.com/";
+import { useAuth } from "@/context/authContext/AuthContext";
+import { URLS } from "@/helpers/urls";
 
 export default function LoginScreen() {
-	const [email, setEmail] = useState("");
+	const [phone, setPhone] = useState("");
 	const [password, setPassword] = useState("");
 	const [loading, setLoading] = useState(false);
 	const { isAuthenticated, login } = useAuth();
@@ -23,23 +22,24 @@ export default function LoginScreen() {
 			router.replace("/(tabs)");
 		}
 	}, [isAuthenticated]);
+
 	const handleLogin = async () => {
-		if (!email || !password) {
+		if (!phone || !password) {
 			Alert.alert("Error", "Please fill in all fields");
 			return;
 		}
 
 		try {
 			setLoading(true);
-			const response = await axios.post(`${API_URL}/auth`, {
-				email,
+			const response = await axios.post(URLS.AUTH, {
+				phone,
 				password,
 			});
 
 			if (response.data && response.data.token) {
 				// Store user data and token using the auth context
 				const userData = {
-					email,
+					phone,
 					token: response.data.token,
 				};
 
@@ -60,14 +60,14 @@ export default function LoginScreen() {
 		<ThemedView style={styles.container}>
 			<ThemedText type="title" style={styles.title}>
 				Login to Kami Services
-			</ThemedText>{" "}
+			</ThemedText>
 			<Input
-				placeholder="Email"
+				placeholder="Phone"
 				leftIcon={{ type: "font-awesome", name: "envelope" }}
-				onChangeText={setEmail}
-				value={email}
+				onChangeText={setPhone}
+				value={phone}
 				autoCapitalize="none"
-				keyboardType="email-address"
+				keyboardType="phone-pad"
 				containerStyle={styles.inputContainer}
 			/>
 			<Input

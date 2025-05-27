@@ -1,44 +1,20 @@
-import React, { useState, useEffect } from "react";
-import { Image } from "expo-image";
-import { StyleSheet, TouchableOpacity, FlatList } from "react-native";
-import { router } from "expo-router";
 import axios from "axios";
+import { Image } from "expo-image";
+import { router } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { FlatList, StyleSheet, TouchableOpacity } from "react-native";
 
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { IconSymbol } from "@/components/ui/IconSymbol";
+import { Service } from "@/interface/services/types";
 
 const API_URL = "https://kami-backend-5rs0.onrender.com/services";
-
-interface Service {
-	id: string;
-	name: string;
-	description: string;
-	price: number;
-	category: string;
-	imageUrl?: string;
-}
-
-interface Category {
-	id: string;
-	name: string;
-	icon: string;
-}
 
 export default function HomeScreen() {
 	const [featuredServices, setFeaturedServices] = useState<Service[]>([]);
 	const [loading, setLoading] = useState(true);
-
-	// Example categories
-	const categories: Category[] = [
-		{ id: "1", name: "Cleaning", icon: "spray.sparkle" },
-		{ id: "2", name: "Plumbing", icon: "water.waves" },
-		{ id: "3", name: "Electrical", icon: "bolt.fill" },
-		{ id: "4", name: "Gardening", icon: "leaf.fill" },
-		{ id: "5", name: "Painting", icon: "paintbrush.fill" },
-		{ id: "6", name: "Moving", icon: "shippingbox.fill" },
-	];
 
 	useEffect(() => {
 		fetchFeaturedServices();
@@ -58,30 +34,13 @@ export default function HomeScreen() {
 	};
 
 	const navigateToService = (serviceId: string) => {
-		router.push(`/(tabs)/service/${serviceId}`);
+		router.push(`/service/${serviceId}`);
 	};
-
-	const navigateToCategory = (categoryId: string, categoryName: string) => {
-		// In a real app, you would navigate to a category-filtered services screen
-		console.log(`Navigate to category: ${categoryName}`);
-	};
-
-	const renderCategoryItem = ({ item }: { item: Category }) => (
-		<TouchableOpacity
-			style={styles.categoryItem}
-			onPress={() => navigateToCategory(item.id, item.name)}
-		>
-			<ThemedView style={styles.categoryIconContainer}>
-				<IconSymbol size={24} name={item.icon} color="#4B7BEC" />
-			</ThemedView>
-			<ThemedText style={styles.categoryName}>{item.name}</ThemedText>
-		</TouchableOpacity>
-	);
 
 	const renderFeaturedItem = ({ item }: { item: Service }) => (
 		<TouchableOpacity
 			style={styles.featuredItem}
-			onPress={() => navigateToService(item.id)}
+			onPress={() => navigateToService(item?._id)}
 		>
 			<ThemedView style={styles.featuredImageContainer}>
 				{item.imageUrl ? (
@@ -119,44 +78,6 @@ export default function HomeScreen() {
 				</ThemedText>
 			</ThemedView>
 
-			<ThemedView style={styles.searchContainer}>
-				<TouchableOpacity
-					style={styles.searchBar}
-					onPress={() => console.log("Search pressed")}
-				>
-					<IconSymbol
-						size={20}
-						name="magnifyingglass"
-						color="#4B7BEC"
-					/>
-					<ThemedText style={styles.searchText}>
-						Search for services...
-					</ThemedText>
-				</TouchableOpacity>
-			</ThemedView>
-
-			<ThemedView style={styles.sectionContainer}>
-				<ThemedView style={styles.sectionHeader}>
-					<ThemedText type="subtitle" style={styles.sectionTitle}>
-						Categories
-					</ThemedText>
-					<TouchableOpacity
-						onPress={() => router.push("/(tabs)/services")}
-					>
-						<ThemedText style={styles.seeAll}>See All</ThemedText>
-					</TouchableOpacity>
-				</ThemedView>
-
-				<FlatList
-					data={categories}
-					renderItem={renderCategoryItem}
-					keyExtractor={(item) => item.id}
-					horizontal
-					showsHorizontalScrollIndicator={false}
-					contentContainerStyle={styles.categoriesList}
-				/>
-			</ThemedView>
-
 			<ThemedView style={styles.sectionContainer}>
 				<ThemedView style={styles.sectionHeader}>
 					<ThemedText type="subtitle" style={styles.sectionTitle}>
@@ -177,7 +98,7 @@ export default function HomeScreen() {
 					<FlatList
 						data={featuredServices}
 						renderItem={renderFeaturedItem}
-						keyExtractor={(item) => item.id}
+						keyExtractor={(item) => item?._id}
 						horizontal
 						showsHorizontalScrollIndicator={false}
 						contentContainerStyle={styles.featuredList}
