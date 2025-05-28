@@ -6,14 +6,16 @@ import { Customer } from "@/storage/customers/types";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useCallback } from "react";
-import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
+import {
+	ActivityIndicator,
+	FlatList,
+	StyleSheet,
+	TouchableOpacity,
+	View,
+} from "react-native";
 
 export default function CustomerScreen() {
 	const { customers, isLoading, isSuccess } = useCustomerContext();
-
-	const handleSelectAdd = useCallback((id?: string) => {
-		router.push(`/customer/details/${id}`);
-	}, []);
 
 	const renderCustomers = useCallback(
 		({ item }: { item: Customer }) => (
@@ -47,7 +49,16 @@ export default function CustomerScreen() {
 	);
 
 	if (isLoading) {
-		return <></>;
+		return (
+			<>
+				<ThemedView style={styles.emptyContainer}>
+					<ActivityIndicator size="large" color="#4B7BEC" />
+					<ThemedText style={styles.emptyText}>
+						Loading customers...
+					</ThemedText>
+				</ThemedView>
+			</>
+		);
 	}
 
 	return (
