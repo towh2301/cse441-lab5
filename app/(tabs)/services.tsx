@@ -1,70 +1,94 @@
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
+import { IconSymbol } from "@/components/ui/IconSymbol";
+import { useServiceContext } from "@/context/serviceContext/ServiceContext";
+import { Service } from "@/storage/services/types";
 import { Ionicons } from "@expo/vector-icons";
-import axios from "axios";
 import { router } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
 	ActivityIndicator,
 	FlatList,
 	StyleSheet,
 	TouchableOpacity,
+	View,
 } from "react-native";
-
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
-import { IconSymbol } from "@/components/ui/IconSymbol";
-import { URLS } from "@/helpers/urls";
-import { Service } from "@/storage/services/types";
+import { Menu } from "react-native-paper";
 
 export default function ServicesScreen() {
-	const [services, setServices] = useState<Service[]>([]);
-	const [loading, setLoading] = useState(true);
+	const { fetchServices, isLoading, services, deleteServiceById } =
+		useServiceContext();
 	const [error, setError] = useState<string | null>(null);
+	const [visibleMenuId, setVisibleMenuId] = useState<string | null>(null);
 
-	useEffect(() => {
-		fetchServices();
+	const handleSelectService = useCallback((serviceId: string) => {
+		router.push(`/service/details/${serviceId}`);
 	}, []);
 
-	const fetchServices = async () => {
+	const handleRetry = useCallback(async () => {
 		try {
-			setLoading(true);
-			const response = await axios.get(URLS.SERVICES);
-			setServices(response?.data || []);
 			setError(null);
+			await fetchServices();
 		} catch (err) {
-			console.error("Error fetching services:", err);
 			setError("Failed to load services. Please try again.");
-		} finally {
-			setLoading(false);
 		}
-	};
+	}, [fetchServices]);
 
-	const handleSelectService = (serviceId: string) => {
-		router.push(`/service/${serviceId}`);
-	};
-
-	const renderServiceItem = ({ item }: { item: Service }) => (
-		<TouchableOpacity
-			style={styles.serviceCard}
-			onPress={() => handleSelectService(item?._id)}
-		>
-			<ThemedView style={styles.serviceContent}>
-				<ThemedText type="subtitle" style={styles.serviceName}>
-					{item.name}
-				</ThemedText>
-				<ThemedText style={styles.servicePrice}>
-					${item.price.toFixed(2)}
-				</ThemedText>
-			</ThemedView>
-			<IconSymbol
-				size={24}
-				name="chevron.right"
-				color="#4B7BEC"
-				style={styles.chevron}
-			/>
-		</TouchableOpacity>
+	const renderServiceItem = useCallback(
+		({ item }: { item: Service }) => (
+			<View style={styles.serviceCardContainer}>
+				<TouchableOpacity
+					style={styles.serviceCard}
+					onPress={() => handleSelectService(item._id)}
+					activeOpacity={0.7}
+				>
+					<ThemedView style={styles.serviceContent}>
+						<View>
+							<ThemedText
+								type="subtitle"
+								style={styles.serviceName}
+							>
+								{item.name}
+							</ThemedText>
+							<ThemedText style={styles.servicePrice}>
+								${item.price.toFixed(2)}
+							</ThemedText>
+						</View>
+						<View style={styles.menuWrapper}>
+							<Menu
+								visible={visibleMenuId === item._id}
+								onDismiss={() => setVisibleMenuId(null)}
+								anchor={
+									<TouchableOpacity
+										onPress={() =>
+											setVisibleMenuId(item._id)
+										}
+									>
+										<Ionicons
+											name="ellipsis-vertical-outline"
+											size={20}
+											color="#555"
+										/>
+									</TouchableOpacity>
+								}
+							>
+								<Menu.Item
+									onPress={() => {
+										deleteServiceById(item._id);
+										setVisibleMenuId(null);
+									}}
+									title="Delete"
+								/>
+							</Menu>
+						</View>
+					</ThemedView>
+				</TouchableOpacity>
+			</View>
+		),
+		[handleSelectService, visibleMenuId, setVisibleMenuId]
 	);
 
-	if (loading) {
+	if (isLoading) {
 		return (
 			<ThemedView style={styles.loadingContainer}>
 				<ActivityIndicator size="large" color="#4B7BEC" />
@@ -86,7 +110,7 @@ export default function ServicesScreen() {
 				<ThemedText style={styles.errorText}>{error}</ThemedText>
 				<TouchableOpacity
 					style={styles.retryButton}
-					onPress={fetchServices}
+					onPress={handleRetry}
 				>
 					<ThemedText style={styles.retryText}>Retry</ThemedText>
 				</TouchableOpacity>
@@ -100,15 +124,18 @@ export default function ServicesScreen() {
 				<ThemedText type="title" style={styles.title}>
 					Available Services
 				</ThemedText>
-				<TouchableOpacity onPress={() => console.log("add")}>
+				<TouchableOpacity
+					activeOpacity={0.7}
+					onPress={() => router.push("/service/add/AddService")}
+				>
 					<Ionicons name="add-circle" size={24} color="#4B7BEC" />
 				</TouchableOpacity>
 			</ThemedView>
-			{services?.length > 0 ? (
+			{services?.length ? (
 				<FlatList
 					data={services}
 					renderItem={renderServiceItem}
-					keyExtractor={(item) => item?._id}
+					keyExtractor={(item) => item._id}
 					contentContainerStyle={styles.servicesList}
 					showsVerticalScrollIndicator={false}
 				/>
@@ -134,11 +161,11 @@ const styles = StyleSheet.create({
 		paddingTop: 60,
 	},
 	header: {
-		paddingHorizontal: 20,
-		marginBottom: 20,
 		flexDirection: "row",
 		justifyContent: "space-between",
 		alignItems: "center",
+		paddingHorizontal: 20,
+		marginBottom: 20,
 	},
 	title: {
 		fontSize: 28,
@@ -153,37 +180,28 @@ const styles = StyleSheet.create({
 		borderRadius: 15,
 		marginBottom: 15,
 		padding: 15,
+		backgroundColor: "#FFFFFF",
+		borderColor: "#E0E0E0",
+		borderWidth: 1,
 		shadowColor: "#000",
 		shadowOffset: { width: 0, height: 2 },
 		shadowOpacity: 0.1,
 		shadowRadius: 4,
 		elevation: 2,
-		backgroundColor: "#FFFFFF",
-		borderColor: "#E0E0E0",
-		borderWidth: 1,
 	},
 	serviceContent: {
-		flex: 1,
+		flexDirection: "row",
+		alignItems: "center",
 	},
 	serviceName: {
 		fontSize: 18,
 		fontWeight: "bold",
 		marginBottom: 5,
 	},
-	serviceDescription: {
-		fontSize: 14,
-		marginBottom: 10,
-		color: "#666",
-	},
 	servicePrice: {
 		fontSize: 16,
 		fontWeight: "600",
 		color: "#4B7BEC",
-		marginBottom: 5,
-	},
-	serviceCategory: {
-		fontSize: 14,
-		color: "#888",
 	},
 	chevron: {
 		alignSelf: "center",
@@ -196,6 +214,7 @@ const styles = StyleSheet.create({
 	},
 	loadingText: {
 		marginTop: 10,
+		fontSize: 16,
 		color: "#666",
 	},
 	errorContainer: {
@@ -219,6 +238,7 @@ const styles = StyleSheet.create({
 	},
 	retryText: {
 		color: "#FFFFFF",
+		fontSize: 16,
 		fontWeight: "600",
 	},
 	emptyContainer: {
@@ -233,9 +253,17 @@ const styles = StyleSheet.create({
 		color: "#666",
 		textAlign: "center",
 	},
-
-	buttonStyle: {
-		fontSize: 16,
-		color: "#666",
+	serviceCardContainer: {
+		flexDirection: "row",
+		alignItems: "center",
+		justifyContent: "space-between",
+		paddingHorizontal: 8,
+	},
+	menuWrapper: {
+		flex: 1,
+		alignItems: "flex-end",
+		justifyContent: "center",
+		zIndex: 999, // cần thiết để tránh bị TouchableOpacity che
+		backgroundColor: "transparent", // optional
 	},
 });

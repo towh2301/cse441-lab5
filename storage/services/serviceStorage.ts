@@ -70,3 +70,11 @@ export const createService = async (service: Service): Promise<void> => {
 		console.error("Errors while creating a service: ", error);
 	}
 };
+
+export const clearServices = async (): Promise<void> => {
+	try {
+		await AsyncStorage.removeItem(STORAGE_KEY.SERVICES);
+	} catch (error) {
+		console.error("Errors while creating a service: ", error);
+	}
+};

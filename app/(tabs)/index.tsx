@@ -33,7 +33,7 @@ export default function HomeScreen() {
 	};
 
 	const navigateToService = (serviceId: string) => {
-		router.push(`/service/${serviceId}`);
+		router.push(`/service/details/${serviceId}`);
 	};
 
 	const renderFeaturedItem = ({ item }: { item: Service }) => (

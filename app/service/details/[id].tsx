@@ -1,39 +1,60 @@
 import axios from "axios";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import {
 	ActivityIndicator,
 	Alert,
+	Modal,
 	StyleSheet,
 	TouchableOpacity,
+	View,
 } from "react-native";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { IconSymbol } from "@/components/ui/IconSymbol";
-import { Service } from "@/interface/services/types";
+import { useServiceContext } from "@/context/serviceContext/ServiceContext";
+import { Service } from "@/storage/services/types";
+import { Ionicons } from "@expo/vector-icons";
 
 const API_URL = "https://kami-backend-5rs0.onrender.com/services";
 
-export default function ServiceDetails() {
+const ServiceDetails = () => {
 	const { id } = useLocalSearchParams();
 	const [service, setService] = useState<Service | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const navigation = useNavigation();
+	const { deleteServiceById, handleInvalidateData } = useServiceContext();
+
+	const [menuVisible, setMenuVisible] = useState(false);
+
+	const toggleMenu = () => setMenuVisible((prev) => !prev);
+	const closeMenu = () => setMenuVisible(false);
 
 	useEffect(() => {
 		fetchServiceDetails();
 	}, [id]);
 
-	useEffect(() => {
+	useLayoutEffect(() => {
 		if (id && service) {
 			navigation.setOptions({
 				title: `${service?.name}`,
-				styles: {},
+				headerRight: () => (
+					<TouchableOpacity
+						onPress={toggleMenu}
+						style={{ marginRight: 15 }}
+					>
+						<Ionicons
+							name="ellipsis-vertical-outline"
+							size={20}
+							color="#555"
+						/>
+					</TouchableOpacity>
+				),
 			});
 		}
-	}, [id, service]);
+	}, [navigation, id, service]);
 
 	const fetchServiceDetails = async () => {
 		if (!id) return;
@@ -56,10 +77,7 @@ export default function ServiceDetails() {
 			"Book Service",
 			`Would you like to book ${service?.name}?`,
 			[
-				{
-					text: "Cancel",
-					style: "cancel",
-				},
+				{ text: "Cancel", style: "cancel" },
 				{
 					text: "Book Now",
 					onPress: () => {
@@ -69,6 +87,18 @@ export default function ServiceDetails() {
 				},
 			]
 		);
+	};
+
+	const handleDelete = async () => {
+		try {
+			await deleteServiceById(String(id));
+			handleInvalidateData();
+			router.back();
+		} catch (error) {
+			console.error("Delete failed:", error);
+		} finally {
+			closeMenu();
+		}
 	};
 
 	if (loading) {
@@ -127,37 +157,35 @@ export default function ServiceDetails() {
 					</ThemedText>
 				</TouchableOpacity>
 			</ThemedView>
+
+			<Modal
+				visible={menuVisible}
+				transparent
+				animationType="fade"
+				onRequestClose={closeMenu}
+			>
+				<TouchableOpacity
+					style={styles.modalOverlay}
+					activeOpacity={1}
+					onPress={closeMenu}
+				>
+					<View style={styles.menuContainer}>
+						<TouchableOpacity
+							onPress={handleDelete}
+							style={styles.menuItem}
+						>
+							<ThemedText>Delete</ThemedText>
+						</TouchableOpacity>
+					</View>
+				</TouchableOpacity>
+			</Modal>
 		</ThemedView>
 	);
-}
+};
 
 const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-	},
-	scrollContainer: {
-		flex: 1,
-	},
-	backButton: {
-		flexDirection: "row",
-		alignItems: "center",
-		paddingHorizontal: 15,
-		paddingTop: 50,
-		paddingBottom: 10,
-	},
-	backText: {
-		fontSize: 16,
-		color: "#4B7BEC",
-		marginLeft: 5,
-	},
-	serviceImage: {
-		width: "100%",
-		height: 250,
-		backgroundColor: "#E1E1E1",
-	},
-	contentContainer: {
-		padding: 20,
-	},
+	container: { flex: 1 },
+	contentContainer: { padding: 20 },
 	serviceName: {
 		fontSize: 24,
 		fontWeight: "bold",
@@ -173,50 +201,6 @@ const styles = StyleSheet.create({
 		fontSize: 22,
 		fontWeight: "bold",
 		color: "#4B7BEC",
-	},
-	category: {
-		fontSize: 16,
-		color: "#666",
-		backgroundColor: "#F0F0F0",
-		paddingHorizontal: 10,
-		paddingVertical: 5,
-		borderRadius: 15,
-	},
-	section: {
-		marginBottom: 20,
-	},
-	sectionTitle: {
-		fontSize: 18,
-		fontWeight: "600",
-		marginBottom: 10,
-	},
-	description: {
-		fontSize: 16,
-		lineHeight: 24,
-		color: "#333",
-	},
-	details: {
-		fontSize: 16,
-		lineHeight: 24,
-		color: "#333",
-	},
-	providerInfo: {
-		padding: 15,
-		backgroundColor: "#F8F8F8",
-		borderRadius: 10,
-	},
-	providerName: {
-		fontSize: 16,
-		fontWeight: "600",
-		marginBottom: 5,
-	},
-	ratingContainer: {
-		flexDirection: "row",
-		alignItems: "center",
-	},
-	rating: {
-		marginLeft: 5,
-		color: "#666",
 	},
 	bookButtonContainer: {
 		padding: 15,
@@ -267,4 +251,27 @@ const styles = StyleSheet.create({
 		color: "#FFFFFF",
 		fontWeight: "600",
 	},
+	modalOverlay: {
+		flex: 1,
+		backgroundColor: "rgba(0,0,0,0.1)",
+	},
+	menuContainer: {
+		position: "absolute",
+		top: 50,
+		right: 15,
+		backgroundColor: "#fff",
+		paddingVertical: 10,
+		paddingHorizontal: 15,
+		borderRadius: 8,
+		elevation: 5,
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.2,
+		shadowRadius: 4,
+	},
+	menuItem: {
+		paddingVertical: 8,
+	},
 });
+
+export default ServiceDetails;
