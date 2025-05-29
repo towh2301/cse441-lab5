@@ -4,14 +4,20 @@ import { useTransactionContext } from "@/context/transactionContext/TransactionC
 import { Service } from "@/storage/services/types";
 import { Transaction } from "@/storage/transactions/types";
 import { Ionicons } from "@expo/vector-icons";
-import { router, useLocalSearchParams } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
-import { ScrollView, StyleSheet, TouchableOpacity } from "react-native";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
+import { useCallback, useEffect, useLayoutEffect, useState } from "react";
+import {
+	ActivityIndicator,
+	ScrollView,
+	StyleSheet,
+	TouchableOpacity,
+} from "react-native";
 
 export default function TransactionDetailScreen() {
 	const { transactions, isLoading } = useTransactionContext();
 	const { id } = useLocalSearchParams();
 	const [transaction, setTransaction] = useState<Transaction | null>(null);
+	const navigation = useNavigation();
 
 	useEffect(() => {
 		if (transactions && id) {
@@ -21,6 +27,14 @@ export default function TransactionDetailScreen() {
 			setTransaction(foundTransaction || null);
 		}
 	}, [transactions, id]);
+
+	useLayoutEffect(() => {
+		if (id && transaction) {
+			navigation.setOptions({
+				headerShown: false,
+			});
+		}
+	}, [id, transaction]);
 
 	const formatDateTime = (dateTimeStr: string | undefined) => {
 		if (!dateTimeStr) return "";
@@ -74,6 +88,14 @@ export default function TransactionDetailScreen() {
 	const payment = transaction.price || 0;
 
 	if (isLoading) {
+		return (
+			<>
+				<ThemedView style={styles.container}>
+					<ActivityIndicator size="large" color="#4B7BEC" />
+					<ThemedText style={styles.content}>Loading...</ThemedText>
+				</ThemedView>
+			</>
+		);
 	}
 
 	return (
@@ -123,8 +145,11 @@ export default function TransactionDetailScreen() {
 					<ThemedText style={styles.sectionTitle}>
 						Services list
 					</ThemedText>
-					{services.map((service) => renderServiceItem(service, 1))}{" "}
-					{/* Adjust quantity logic if needed */}
+					<ThemedText>
+						{services.map((service) =>
+							renderServiceItem(service, 1)
+						)}{" "}
+					</ThemedText>
 					<ThemedView style={styles.infoRow}>
 						<ThemedText style={styles.label}>Total</ThemedText>
 						<ThemedText style={styles.value}>
