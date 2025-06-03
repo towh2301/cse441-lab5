@@ -17,12 +17,16 @@ import {
 export default function CustomerScreen() {
 	const { customers, isLoading, isSuccess } = useCustomerContext();
 
+	const handleOnClickCustomer = useCallback((id?: string) => {
+		router.push(`/customer/details/${id}`);
+	}, []);
+
 	const renderCustomers = useCallback(
 		({ item }: { item: Customer }) => (
 			<View>
 				<TouchableOpacity
 					style={styles.serviceCard}
-					//onPress={() => handleSelectCustomer(item?._id)}
+					onPress={() => handleOnClickCustomer(item?._id)}
 					activeOpacity={0.7}
 				>
 					<ThemedView style={styles.serviceContent}>

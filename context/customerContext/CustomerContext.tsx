@@ -3,7 +3,7 @@ import {
 	getCustomers,
 	setCustomers,
 } from "@/storage/customers/customerStorage";
-import { Customer } from "@/storage/customers/types";
+import { Customer, CustomerResponse } from "@/storage/customers/types";
 import axios from "axios";
 import { createContext, useContext, useEffect, useState } from "react";
 
@@ -13,6 +13,7 @@ type CustomerContextType = {
 	isLoading?: boolean;
 	isSuccess?: boolean;
 	handleInvalidateCustomers: () => Promise<void>;
+	fetchCustomerDetails: (id: string) => Promise<CustomerResponse | undefined>;
 	[key: string]: unknown; // any but more strict ( have to check type before use)
 };
 
@@ -51,6 +52,21 @@ export const CustomerProvider: React.FC<CustomerProviderProps> = ({
 			setIsSuccess(true);
 		} catch (error) {
 			console.error("Failed to fetch customers: ", error);
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	const fetchCustomerDetails = async (
+		id: string
+	): Promise<CustomerResponse | undefined> => {
+		try {
+			const response = await axios.get<CustomerResponse>(
+				URLS.CUSTOMERS + `/${id}`
+			);
+			return response?.data;
+		} catch (error) {
+			console.error("Failed to fetch customer details: ", error);
 		} finally {
 			setIsLoading(false);
 		}
@@ -96,6 +112,7 @@ export const CustomerProvider: React.FC<CustomerProviderProps> = ({
 					isSuccess,
 					addCustomer,
 					handleInvalidateCustomers,
+					fetchCustomerDetails,
 				}}
 			>
 				{children}

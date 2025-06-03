@@ -54,11 +54,25 @@ export default function TransactionScreen() {
 								</ThemedText>
 								<ThemedText style={styles.transactionService}>
 									-{" "}
-									{item.service?.name ||
-										"Service not specified"}{" "}
-									{item.price
-										? `${item.price.toLocaleString()} đ`
-										: ""}
+									{item.service && item.service.length > 0 ? (
+										<>
+											{item.service.map(
+												(service, index) => (
+													<View key={index}>
+														<ThemedText>
+															{service.name}
+															{item.price &&
+															index === 0
+																? ` - ${item.price.toLocaleString()} đ`
+																: ""}
+														</ThemedText>
+													</View>
+												)
+											)}
+										</>
+									) : (
+										"Service not specified"
+									)}
 								</ThemedText>
 								<ThemedText style={styles.transactionCustomer}>
 									Customer: {item.customer?.name || "Unknown"}

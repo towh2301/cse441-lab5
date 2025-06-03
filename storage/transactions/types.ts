@@ -6,7 +6,7 @@ export interface Transaction {
 	_id?: string;
 	id?: string;
 	customer?: Customer;
-	service?: Service;
+	service?: Service[];
 	priceBeforePromotion?: number;
 	price?: number;
 	status?: Status;
