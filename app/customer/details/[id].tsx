@@ -3,6 +3,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { useCustomerContext } from "@/context/customerContext/CustomerContext";
 import { CustomerResponse } from "@/storage/customers/types";
 import { Service } from "@/storage/services/types";
+import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import {
@@ -10,6 +11,7 @@ import {
 	FlatList,
 	ScrollView,
 	StyleSheet,
+	TouchableOpacity,
 } from "react-native";
 
 export default function CustomerDetailsScreen() {
@@ -91,8 +93,17 @@ export default function CustomerDetailsScreen() {
 		);
 	}
 
+	const handleBack = () => {
+		navigation.goBack();
+	};
+
 	return (
 		<ThemedView style={styles.container}>
+			<ThemedView style={styles.header}>
+				<TouchableOpacity style={styles.button} onPress={handleBack}>
+					<Ionicons name="arrow-back" />
+				</TouchableOpacity>
+			</ThemedView>
 			<ThemedView style={styles.section}>
 				<ThemedText style={styles.sectionTitle}>
 					General Information
@@ -137,11 +148,11 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		paddingTop: 60,
+		paddingHorizontal: 20,
 	},
 	header: {
 		flexDirection: "row",
 		alignItems: "center",
-		paddingHorizontal: 20,
 		marginBottom: 20,
 	},
 	title: {
@@ -197,5 +208,12 @@ const styles = StyleSheet.create({
 		color: "#FF4444",
 		fontSize: 18,
 		fontWeight: "600",
+	},
+	button: {
+		padding: 10,
+		borderRadius: 20,
+		backgroundColor: "#f0f0f0",
+		justifyContent: "center",
+		alignItems: "center",
 	},
 });
