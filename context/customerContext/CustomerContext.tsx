@@ -103,10 +103,15 @@ export const CustomerProvider: React.FC<CustomerProviderProps> = ({
 				return false;
 			}
 
-			const response = await axios.put(`${URLS.CUSTOMERS}/${id}`, {
-				...customer,
-				token: userData.token,
-			});
+			const response = await axios.put(
+				`${URLS.CUSTOMERS}/${id}`,
+				customer,
+				{
+					headers: {
+						Authorization: `Bearer ${userData?.token}`,
+					},
+				}
+			);
 
 			if (response.status === 200) {
 				await fetchCustomers(); // Refresh the customers list
@@ -127,9 +132,11 @@ export const CustomerProvider: React.FC<CustomerProviderProps> = ({
 				return false;
 			}
 
+			console.log("Deleting customer with ID:", userData?.token);
+
 			const response = await axios.delete(`${URLS.CUSTOMERS}/${id}`, {
-				data: {
-					token: userData.token,
+				headers: {
+					Authorization: `Bearer ${userData?.token}`,
 				},
 			});
 

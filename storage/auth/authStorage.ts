@@ -26,6 +26,7 @@ export const clearUserData = async (): Promise<void> => {
 export const getUserData = async (): Promise<UserData | null> => {
 	try {
 		const userData = await AsyncStorage.getItem(STORAGE_KEY.USER_DATA);
+		console.log("UserData: ", userData);
 		return userData != null ? JSON.parse(userData) : null;
 	} catch (error) {
 		console.error("Error while get UserData.");

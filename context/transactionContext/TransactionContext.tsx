@@ -81,11 +81,18 @@ export const TransactionProvider: React.FC<TransactionProviderProps> = ({
 				return false;
 			}
 
-			const response = await axios.post(URLS.TRANSACTIONS, {
-				customerId: data.customerId,
-				services: data.services,
-				token: userData.token,
-			});
+			const response = await axios.post(
+				URLS.TRANSACTIONS,
+				{
+					customerId: data.customerId,
+					services: data.services,
+				},
+				{
+					headers: {
+						Authorization: `Bearer ${userData?.token}`,
+					},
+				}
+			);
 
 			if (response.status === 200 || response.status === 201) {
 				await fetchTransactions(); // Refresh transactions
@@ -110,8 +117,8 @@ export const TransactionProvider: React.FC<TransactionProviderProps> = ({
 			}
 
 			const response = await axios.delete(`${URLS.TRANSACTIONS}/${id}`, {
-				data: {
-					token: userData.token,
+				headers: {
+					Authorization: `Bearer ${userData?.token}`,
 				},
 			});
 
