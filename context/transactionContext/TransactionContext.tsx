@@ -76,15 +76,15 @@ export const TransactionProvider: React.FC<TransactionProviderProps> = ({
 		try {
 			setIsLoading(true);
 			const userData = await getUserData();
-			// if (!userData?.token) {
-			// 	console.error("No auth token found");
-			// 	return false;
-			// }
+			if (!userData?.token) {
+				console.error("No auth token found");
+				return false;
+			}
 
 			const response = await axios.post(URLS.TRANSACTIONS, {
 				customerId: data.customerId,
 				services: data.services,
-				//token: userData.token,
+				token: userData.token,
 			});
 
 			if (response.status === 200 || response.status === 201) {
