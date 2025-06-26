@@ -48,12 +48,11 @@ export default function TransactionScreen() {
 									type="subtitle"
 									style={styles.transactionId}
 								>
-									{item.id} - {transactionDate}{" "}
-									{transactionTime}{" "}
+									{item.id} - {transactionDate}
+									{transactionTime}
 									{isCancelled && "- Cancelled"}
 								</ThemedText>
 								<ThemedText style={styles.transactionService}>
-									-{" "}
 									{item.service && item.service.length > 0 ? (
 										<>
 											{item.service.map(

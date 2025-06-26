@@ -1,7 +1,7 @@
 import { Service } from "../services/types";
 import { Customer } from "./../customers/types";
 
-type Status = "available" | "unavailable";
+type Status = "available" | "unavailable" | "cancelled";
 export interface Transaction {
 	_id?: string;
 	id?: string;

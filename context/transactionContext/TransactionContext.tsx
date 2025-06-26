@@ -1,4 +1,5 @@
 import { URLS } from "@/helpers/urls";
+import { getUserData } from "@/storage/auth/authStorage";
 import {
 	getTransactions,
 	setTransactions,
@@ -7,8 +8,21 @@ import { Transaction } from "@/storage/transactions/types";
 import axios from "axios";
 import { createContext, useContext, useEffect, useState } from "react";
 
+interface TransactionService {
+	id: string;
+	quantity: number;
+	userID: string;
+}
+
+interface CreateTransactionData {
+	customerId: string;
+	services: TransactionService[];
+}
+
 type TransactionContextType = {
 	transactions: Transaction[] | null;
+	addTransaction: (data: CreateTransactionData) => Promise<boolean>;
+	deleteTransaction: (id: string) => Promise<boolean>;
 	isLoading?: boolean;
 	isSuccess?: boolean;
 	[key: string]: any; // any but more strict (have to check type before use)
@@ -56,15 +70,59 @@ export const TransactionProvider: React.FC<TransactionProviderProps> = ({
 		}
 	};
 
-	const addTransaction = async (transaction: Transaction) => {
+	const addTransaction = async (
+		data: CreateTransactionData
+	): Promise<boolean> => {
 		try {
-			transactions?.push(transaction);
-			if (transactions != null) {
-				await setTransactions(transactions);
-				setIsSuccess(true);
+			setIsLoading(true);
+			const userData = await getUserData();
+			// if (!userData?.token) {
+			// 	console.error("No auth token found");
+			// 	return false;
+			// }
+
+			const response = await axios.post(URLS.TRANSACTIONS, {
+				customerId: data.customerId,
+				services: data.services,
+				//token: userData.token,
+			});
+
+			if (response.status === 200 || response.status === 201) {
+				await fetchTransactions(); // Refresh transactions
+				return true;
 			}
+			return false;
 		} catch (error) {
-			console.error("Failed to add a new transaction: ", error);
+			console.error("Failed to add transaction: ", error);
+			return false;
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	const deleteTransaction = async (id: string): Promise<boolean> => {
+		try {
+			setIsLoading(true);
+			const userData = await getUserData();
+			if (!userData?.token) {
+				console.error("No auth token found");
+				return false;
+			}
+
+			const response = await axios.delete(`${URLS.TRANSACTIONS}/${id}`, {
+				data: {
+					token: userData.token,
+				},
+			});
+
+			if (response.status === 200) {
+				await fetchTransactions(); // Refresh transactions
+				return true;
+			}
+			return false;
+		} catch (error) {
+			console.error("Failed to delete transaction: ", error);
+			return false;
 		} finally {
 			setIsLoading(false);
 		}
@@ -94,6 +152,7 @@ export const TransactionProvider: React.FC<TransactionProviderProps> = ({
 				transactions,
 				isSuccess,
 				addTransaction,
+				deleteTransaction,
 				handleInvalidateTransactions,
 			}}
 		>

@@ -1,4 +1,5 @@
 import { URLS } from "@/helpers/urls";
+import { getUserData } from "@/storage/auth/authStorage";
 import {
 	getCustomers,
 	setCustomers,
@@ -10,6 +11,11 @@ import { createContext, useContext, useEffect, useState } from "react";
 type CustomerContextType = {
 	customers: Customer[] | null;
 	addCustomer: (customer: Customer) => Promise<void>;
+	updateCustomer: (
+		id: string,
+		customer: Partial<Customer>
+	) => Promise<boolean>;
+	deleteCustomer: (id: string) => Promise<boolean>;
 	isLoading?: boolean;
 	isSuccess?: boolean;
 	handleInvalidateCustomers: () => Promise<void>;
@@ -86,6 +92,58 @@ export const CustomerProvider: React.FC<CustomerProviderProps> = ({
 		}
 	};
 
+	const updateCustomer = async (
+		id: string,
+		customer: Partial<Customer>
+	): Promise<boolean> => {
+		try {
+			const userData = await getUserData();
+			if (!userData?.token) {
+				console.error("No auth token found");
+				return false;
+			}
+
+			const response = await axios.put(`${URLS.CUSTOMERS}/${id}`, {
+				...customer,
+				token: userData.token,
+			});
+
+			if (response.status === 200) {
+				await fetchCustomers(); // Refresh the customers list
+				return true;
+			}
+			return false;
+		} catch (error) {
+			console.error("Failed to update customer: ", error);
+			return false;
+		}
+	};
+
+	const deleteCustomer = async (id: string): Promise<boolean> => {
+		try {
+			const userData = await getUserData();
+			if (!userData?.token) {
+				console.error("No auth token found");
+				return false;
+			}
+
+			const response = await axios.delete(`${URLS.CUSTOMERS}/${id}`, {
+				data: {
+					token: userData.token,
+				},
+			});
+
+			if (response.status === 200) {
+				await fetchCustomers(); // Refresh the customers list
+				return true;
+			}
+			return false;
+		} catch (error) {
+			console.error("Failed to delete customer: ", error);
+			return false;
+		}
+	};
+
 	const handleInvalidateCustomers = async () => {
 		try {
 			const newCustomers = await getCustomers();
@@ -111,6 +169,8 @@ export const CustomerProvider: React.FC<CustomerProviderProps> = ({
 					customers,
 					isSuccess,
 					addCustomer,
+					updateCustomer,
+					deleteCustomer,
 					handleInvalidateCustomers,
 					fetchCustomerDetails,
 				}}

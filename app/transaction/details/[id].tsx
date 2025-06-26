@@ -127,7 +127,7 @@ export default function TransactionDetailScreen() {
 					<ThemedView style={styles.infoRow}>
 						<ThemedText style={styles.label}>Customer</ThemedText>
 						<ThemedText style={styles.value}>
-							{transaction.customer?.name || "Unknown"} -{" "}
+							{transaction.customer?.name || "Unknown"} -
 							{transaction.customer?.phone || "N/A"}
 						</ThemedText>
 					</ThemedView>
@@ -148,7 +148,7 @@ export default function TransactionDetailScreen() {
 					<ThemedText>
 						{services.map((service) =>
 							renderServiceItem(service, 1)
-						)}{" "}
+						)}
 					</ThemedText>
 					<ThemedView style={styles.infoRow}>
 						<ThemedText style={styles.label}>Total</ThemedText>
